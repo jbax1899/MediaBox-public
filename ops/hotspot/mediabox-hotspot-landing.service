@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore the MediaBox hotspot Dashy landing page
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/mediabox/ops/hotspot/apply-landing.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

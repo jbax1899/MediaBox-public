@@ -1,0 +1,21 @@
+services:
+  shoko:
+    image: ghcr.io/shokoanime/server:latest
+    container_name: shokoserver
+    entrypoint: ["/bin/bash", "/docker-entrypoint.sh"]
+    ports:
+      - "8111:8111"
+    environment:
+      PUID: 1000
+      PGID: 1000
+    volumes:
+      - ./data:/home/shoko/.shoko
+      - ./media/anime:/mnt/anime
+      - ./media/incoming:/mnt/import
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "command -v wget >/dev/null 2>&1 && wget -qO- http://127.0.0.1:8111/ >/dev/null || command -v curl >/dev/null 2>&1 && curl -fsS http://127.0.0.1:8111/ >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s

@@ -1,0 +1,17 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    command: ["-r", "/srv", "-p", "80", "--address", "0.0.0.0", "--database", "/database.db"]
+    ports:
+      - "7050:80"
+    volumes:
+      - ./data/root:/srv
+      - ./data/filebrowser.db:/database.db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:80/health >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

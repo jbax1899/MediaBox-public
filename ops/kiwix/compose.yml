@@ -1,0 +1,20 @@
+services:
+  kiwix-serve:
+    container_name: kiwix-serve
+    build:
+      context: .
+    ports:
+      - "9191:9191"
+    volumes:
+      - ./archive:/archive
+    environment:
+      KIWIX_ARCHIVE_PATH: /archive
+      KIWIX_PORT: "9191"
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9191/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s

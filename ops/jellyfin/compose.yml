@@ -1,0 +1,28 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      TZ: UTC
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8096:8096"
+    volumes:
+      - jellyfin-data:/config
+      - ./cache:/cache:rw
+      - ./media/movies:/media/movies:ro
+      - ./media/tv:/media/tv:ro
+      - ./media/anime:/media/anime:ro
+      - ./media/audiobooks:/media/audiobooks:ro
+      - ./media/music:/media/music:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8096/ >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  jellyfin-data:

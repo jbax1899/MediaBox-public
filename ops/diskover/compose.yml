@@ -1,0 +1,63 @@
+services:
+  diskover:
+    image: lscr.io/linuxserver/diskover:latest
+    container_name: diskover
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+      ES_HOST: elasticsearch
+      ES_PORT: "9200"
+    ports:
+      - "8097:80"
+    volumes:
+      - ./data/diskover/config:/config
+      - ./scan/home:/scan/home:ro
+      - ./scan/music:/scan/music:ro
+      - ./scan/anime:/scan/anime:ro
+      - ./scan/incoming:/scan/incoming:ro
+      - ./scan/archive:/scan/archive:ro
+      - ./scan/library:/scan/library:ro
+      - ./scan/logs:/scan/logs:ro
+      - ./scan/model-cache:/scan/model-cache:ro
+    mem_limit: 4096m
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "(curl -fsS http://127.0.0.1/ >/dev/null || wget -q -O - http://127.0.0.1/ >/dev/null)"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - diskover
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
+    container_name: diskover-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      bootstrap.memory_lock: "true"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data/diskover/esdata:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - diskover
+
+networks:
+  diskover:
+    name: diskover
