@@ -4,18 +4,18 @@
 
 MediaBox is a portable offline knowledge server in a Pelican 1400 case. It provides Wi-Fi-accessible access to books, reference archives, media, retro games, local AI tools, and system utilities without an internet connection.
 
-For current paths and services, see [system-map.md](system-map.md). For local-only and secret-bearing files, see [secret-boundaries.md](secret-boundaries.md).
+For the repository's documented components and the boundary between repository evidence and live deployment, see [system-map.md](system-map.md). For local-only and secret-bearing files, see [secret-boundaries.md](secret-boundaries.md).
 
-## Connecting
+## Recorded connection flow
 
 1. Power on the device.
 2. Wait about 30 to 60 seconds for the Wi-Fi network to appear.
 3. Connect to the `MediaBox` network.
 4. Open `http://10.0.0.1` in a browser.
 
-The homepage is Dashy. The hotspot admin UI stays available on `http://10.0.0.1:8080` if you need RaspAP.
+The recorded intended homepage is Dashy. The documented hotspot admin UI is `http://10.0.0.1:8080` for RaspAP. The repository does not establish that this flow is currently active on the Pi.
 
-## What It Provides
+## Documented capabilities
 
 - Kiwix for offline reference archives
 - Kavita for local ebooks
@@ -41,7 +41,7 @@ Prototype switch-map notes are archived in [reference/build_notes.md](../referen
 ## Maintenance
 
 - If the Pi fails to boot, check startup config, service logs, power, and boot media.
-- If services fail, restart Docker and check the container logs.
+- If a deployed service fails, check its actual startup mechanism and recent logs before restarting anything. The repository contains several Docker migration scaffolds but does not establish which runtime is active.
 - Crafty is served on `http://<LAN-IP>:8443/`.
 - If the Wi-Fi hotspot is missing, confirm Pi power and the hotspot service, then reboot from a known-good power state.
 - For battery or power issues, verify fuse continuity, check the voltmeter, and test AC and solar paths independently.

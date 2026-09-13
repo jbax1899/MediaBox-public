@@ -1,96 +1,86 @@
 # System Map
 
-This doc tracks the current app/source repos, runtime paths, and service ownership for MediaBox. For local-only or secret-bearing details, see [secret-boundaries.md](secret-boundaries.md).
+This is the canonical inventory of MediaBox components, repository evidence, and the questions that still require inspection of the Raspberry Pi. It describes what this checkout records or intends to run; it does not prove that a service is installed, enabled, or healthy on the live device. For local-only or secret-bearing details, see [secret-boundaries.md](secret-boundaries.md).
 
-## App/Source Repos
+## How to read this map
 
-| Category | Examples |
-|----------|----------|
-| MediaBox repo | `~/MediaBox` |
-| Host-local companion checkouts | `~/anythingllm`, `~/dashy`, `~/chatbot`, `~/Kavita`, `~/NavidroFM`, `~/noVNC`, `~/shoko`, `~/webretro` |
+- **Repository representation** means a Compose file, launcher, service unit, or documentation entry exists in this checkout.
+- **Deployment status** is separate. Unless a current Pi inspection proves otherwise, it remains unknown.
+- A historical note can preserve a useful observation without being current operating authority.
+- An absent definition does not prove that a service is absent from the Pi.
 
-## Checked-In Service Scaffolds
+The documented system is a hybrid: host networking and selected host services sit alongside external companion checkouts and several checked-in Docker scaffolds.
 
-| Path |
-|------|
-| `~/MediaBox/ops/opencode` |
-| `~/MediaBox/ops/webretro` |
-| `~/MediaBox/ops/gluetun` |
-| `~/MediaBox/ops/filebrowser` |
-| `~/MediaBox/ops/diskover` |
-| `~/MediaBox/ops/ollama` |
-| `~/MediaBox/ops/swap` |
-| `~/MediaBox/ops/fdroid-repo` |
-| `~/MediaBox/ops/kiwix` |
-| `~/MediaBox/ops/jellyfin` |
-| `~/MediaBox/ops/music-discovery` |
+## App and source repositories
 
-## Runtime/Config Directories
+| Category | Repository evidence | Deployment question |
+|----------|---------------------|---------------------|
+| MediaBox repository | The repository is documented as `~/MediaBox`. | Verify the actual checkout path. The hotspot unit separately hard-codes `/opt/mediabox`. |
+| Host-local companion checkouts | `~/anythingllm`, `~/dashy`, `~/chatbot`, `~/Kavita`, `~/NavidroFM`, `~/noVNC`, `~/shoko`, and `~/webretro` are named in the historical system map. | Verify which checkouts exist, their revisions, and which services start from them. None are included here. |
 
-| Category | Examples |
-|----------|----------|
-| App state and configs | `~/anythingllm/storage`, `~/Kavita/config`, `~/dashy/user-data/conf.yml`, `~/shoko/Shoko.CLI/settings-server.json`, `~/filebrowser.db` |
-| Cache and logs | `~/.cache/jellyfin`, `~/.local/share/jellyfin`, `~/.local/share/jellyfin/log`, `~/beszel/beszel_agent_data`, `~/beszel/beszel_data`, `~/webretro/assets` |
-| Local compose and launcher files | `~/anythingllm/docker-compose.yml`, `~/anythingllm/.env`, `~/anythingllm/storage/.env`, `~/shoko/docker-compose.yml`, `~/start_vnc.sh` |
-| Media and archive roots | `<media-root>/library`, `<media-root>/Music`, `<media-root>/MusicInbox`, `<media-root>/MusicAurral`, `<media-root>/MusicData`, `<archive-root>/KiwixArchives`, `<storage-root>/fdroid`, `<storage-root>/Anime`, `<storage-root>/Incoming` |
-| Service state roots | `<service-state-root>/DiskoverData/config`, `<service-state-root>/DiskoverData/esdata`, `<service-state-root>/MusicData/lidarr`, `<service-state-root>/MusicData/aurral`, `<service-state-root>/MusicData/prowlarr`, `<service-state-root>/MusicData/qbittorrent`, `/var/lib/ollama`, `/var/opt/minecraft/crafty/crafty-4`, `/var/log` |
+## Host networking and services
 
-## Docker Volumes
+| Component | Intended role | Repository representation | Deployment status / verification needed |
+|-----------|---------------|---------------------------|-----------------------------------------|
+| Hotspot and landing path | RaspAP, hostapd, dnsmasq, nginx, and an iptables redirect provide the `wlan1` access point and route port 80 toward Dashy. | [Hotspot README](../ops/hotspot/README.md), [landing script](../ops/hotspot/apply-landing.sh), and [systemd unit](../ops/hotspot/mediabox-hotspot-landing.service). | The intended addresses and interface are documented. Verify installed services, interface state, firewall rules, and whether the unit is enabled. |
+| PM2 services | The historical inventory names `novnc-vnc`, `pi-powerguard`, `webretro`, and `opencode`. | The PM2 list is documented here; only [OpenCode's PM2 config](../ops/opencode/ecosystem.config.cjs) and launcher are checked in. | Verify which processes exist, how PM2 starts at boot, and whether Webretro is still host-served or has moved to the container scaffold below. |
+| systemd services | The historical inventory names `kavita`, `kolibri`, and `openwebrx`. | Names are documented here; their unit files are not in this checkout. | Verify installed units, enablement, source paths, and current state. |
+| Swap and memory policy | The recorded host used an NVMe-backed `/swapfile`; the checked-in target adds zram above it. | [Recorded swap note](swap.md) and [zram scaffold](../ops/swap/README.md). | The note records an earlier inspection. Verify current swap, zram, sysctl values, and whether the target was applied. |
 
-| Volume | Notes |
-|--------|-------|
-| `jellyfin-data` | Jellyfin config volume mounted at `/config` |
+The hotspot unit currently executes `/opt/mediabox/ops/hotspot/apply-landing.sh`, while the repository documentation commonly uses `~/MediaBox`. This is an unresolved deployment-path conflict, not a decision about which path should win.
 
-## Swap
+## Checked-in Docker scaffolds
 
-Current swap behavior is documented in [swap.md](swap.md).
+Each row means that the repository contains a Compose definition. It does not mean the stack is deployed on the Pi.
 
-| Path | Notes |
-|------|-------|
-| `/swapfile` | Live 8 GiB swapfile on the NVMe-backed root filesystem. |
-| `/etc/fstab` | Mounts and activates `/swapfile` at boot. |
-| `/etc/dphys-swapfile` | Installed package config; currently sets `CONF_SWAPSIZE=4096`, which does not match the live file size. |
-| `/etc/sysctl.d/99-swappiness.conf` | Sets `vm.swappiness=10`. |
+| Stack / service | Intended role and documented runtime details | Repository evidence | Deployment status / verification needed |
+|-----------------|----------------------------------------------|---------------------|-----------------------------------------|
+| Diskover and Elasticsearch | File inventory and search on port `8097`; read-only scan mounts; requires `vm.max_map_count=262144`. | [ops/diskover](../ops/diskover/README.md) and [compose.yml](../ops/diskover/compose.yml). | Scaffold only. Verify host preparation, state directories, and whether scans have been configured. |
+| F-Droid repository | Read-only nginx serving on port `8070`, with the repository at `/fdroid/`; sync/update remains host-side in the documentation. | [ops/fdroid-repo](../ops/fdroid-repo/README.md), [compose.yml](../ops/fdroid-repo/compose.yml), and [F-Droid notes](fdroid_readme.md). | Repository representation is present. Verify the repo contents, signing material, sync job, and whether Docker replaced the historical server. |
+| File Browser | File management on port `7050`, with a host database and content root. | [ops/filebrowser](../ops/filebrowser/README.md) and [compose.yml](../ops/filebrowser/compose.yml). | The scaffold describes a Docker target. Verify the actual database path and whether the old PM2 process is stopped. |
+| Gluetun, WebUI, and qBittorrent | VPN gateway with WebUI on `3000` and qBittorrent WebUI on `8098`; qBittorrent shares Gluetun's network namespace. | [ops/gluetun](../ops/gluetun/README.md) and [compose.yml](../ops/gluetun/compose.yml). | Scaffold only. Verify the WireGuard file, local state, container attachment, VPN readiness, and exposed interfaces. |
+| Jellyfin | Media streaming on port `8096`, with a named config volume and read-only media mounts. | [ops/jellyfin](../ops/jellyfin/README.md) and [compose.yml](../ops/jellyfin/compose.yml). | Migration scaffold. Verify the active server, library paths, Shoko integration, and whether any prior host service remains. |
+| Kiwix | Offline ZIM archive server on port `9191`; startup waits for archives and updates `library.xml`. | [ops/kiwix](../ops/kiwix/README.md), [compose.yml](../ops/kiwix/compose.yml), and [start-kiwix.sh](../ops/kiwix/start-kiwix.sh). | Migration scaffold. Verify archive location, library state, and the active startup mechanism before changing anything. |
+| Music discovery: Lidarr, Aurral, and Prowlarr | Discovery and import-review lane on ports `8686`, `3002`, and `9696`, with separate state and media paths. | [ops/music-discovery](../ops/music-discovery/README.md) and [compose.yml](../ops/music-discovery/compose.yml). | Starter scaffold, explicitly not the full acquisition workflow. Verify state paths, provider credentials, and integration with qBittorrent. |
+| Ollama | Shared local model runtime on loopback port `11434`, with model data under `/var/lib/ollama`. | [ops/ollama](../ops/ollama/README.md) and [compose.yml](../ops/ollama/compose.yml). | Verify whether this container is deployed, which models exist, and whether AnythingLLM/OpenCode use it. |
+| Shoko | Anime metadata and library service on port `8111`, with host state and media mounts. | [ops/shoko](../ops/shoko/README.md) and [compose.yml](../ops/shoko/compose.yml). | Verify the active checkout/container, settings file, credentials, and Jellyfin integration. |
+| Webretro | Static retro-game web assets on port `8085`. | [ops/webretro](../ops/webretro/README.md), [compose.yml](../ops/webretro/compose.yml), and [nginx.conf](../ops/webretro/nginx.conf). | The repository contains a container scaffold while the host PM2 inventory still names `webretro`. Verify which runtime is active; do not infer that migration is complete. |
 
-## Host Services
+The Compose files generally define restart policies and healthchecks. These are configuration features only: `docker compose config` validates syntax and interpolation, not ARM compatibility, successful startup, health, or deployment.
 
-### PM2 Services
+## Documented services without checked-in runtime definitions
 
-| Service |
-|---------|
-| `novnc-vnc` |
-| `pi-powerguard` |
-| `webretro` |
-| `opencode` |
+The following services appear in the recorded system inventory or device manual but have no service definition in this checkout: Dashy, AnythingLLM, ROMM, Navidrome, NavidroFM, Filebot, Beszel, Beszel Agent, Crafty, Kavita, Kolibri, OpenWebRX, noVNC, and the lighter chat UI. Their absence here may reflect external checkouts or host-local configuration rather than removal from MediaBox.
 
-### Systemd Services
+Verify each service's actual source, revision, startup mechanism, ports, persistent state, and migration status on the Pi.
 
-| Service |
-|---------|
-| `kavita` |
-| `kolibri` |
-| `openwebrx` |
+## Persistent data and configuration model
 
-## Docker Services
+The repository separates runtime state from checked-in definitions, but the exact live paths are not established.
 
-| Service |
-|---------|
-| `dashy` |
-| `anythingllm` |
-| `ollama` |
-| `romm` |
-| `navidrome` |
-| `NavidroFM` |
-| `filebot` |
-| `shoko` |
-| `gluetun` |
-| `gluetun-webui` |
-| `prowlarr` |
-| `qbittorrent` |
-| `beszel` |
-| `beszel-agent` |
-| `crafty` |
-| `filebrowser` |
-| `kiwix-serve` |
-| `jellyfin` |
-| `fdroid-repo` |
+| Data category | Repository examples | What must be supplied or verified |
+|---------------|---------------------|-----------------------------------|
+| Service state | Compose-local `./data` trees, Jellyfin's `jellyfin-data` volume, `/var/lib/ollama`, and historical service-state roots. | Which paths hold the live databases and whether they are backed up. |
+| Media and archives | `<media-root>/library`, `Music`, `MusicInbox`, `MusicAurral`, `KiwixArchives`, Anime, Incoming, and the Compose-local media/archive mounts. | Actual mount points, ownership, capacity, and library compatibility. |
+| Local configuration | Dashy, AnythingLLM, Shoko, launcher files, and local Compose files outside this repository. | Which checkout/configuration is authoritative. |
+| Secrets and credentials | OpenCode environment/config, F-Droid signing material, provider credentials, and Gluetun's WireGuard file. | Presence and safe handling; do not export or publish secret contents. |
+
+A clean checkout provides documentation, Compose files, a few host launchers, and examples. It does not provide runtime data, media, databases, secrets, companion repositories, host packages, or proof that the documented paths exist. See [secret-boundaries.md](secret-boundaries.md) before adding local configuration.
+
+## Future Pi inspection checklist
+
+Collect the following read-only facts, reviewing output locally for secrets before sharing:
+
+1. Service inventory: `docker compose ls`, selected `docker ps` fields, `systemctl list-unit-files --state=enabled`, and `pm2 list`.
+2. Source identity: deployed Compose file paths, repository revisions, image names/IDs, and companion checkout revisions.
+3. Boot behavior: Docker enablement, PM2 startup configuration, enabled systemd units, and hotspot unit status.
+4. Storage: mount points, filesystem usage, and narrowly selected container mount sources for known services.
+5. Network: interfaces, addresses, listeners, firewall rules, hotspot state, and VPN/container network attachment.
+6. Health/resources: container health, uptime, RAM, disk, swap/zram, and the relevant recent service status or log summaries.
+7. Recovery: names and timestamps of existing backup jobs or archives, without dumping their contents or credentials.
+
+Do not collect indiscriminate environment dumps, PM2 environment exports, raw Docker inspection output, or broad logs. Restarting, updating, migrating, changing firewall/swap settings, and testing restores are separate mutating actions requiring explicit approval.
+
+## Swap record
+
+The historical swap details are maintained in [swap.md](swap.md). Treat its “current” wording as a recorded observation until the live host is inspected.

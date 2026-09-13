@@ -31,3 +31,4 @@ docker compose -f compose.yml up -d
 - Keep the assets mounted so the runtime stays generic and easy to reproduce.
 - If the current front end needs different cache or CORS behavior later, adjust the nginx config rather than baking those changes into a custom image.
 - The PM2 wrapper was a plain `http-server` invocation, so the Docker version stays intentionally small.
+- The repository still records `webretro` in the historical PM2 service list. Verify whether the host process or this container is active; this scaffold does not establish that migration is complete.

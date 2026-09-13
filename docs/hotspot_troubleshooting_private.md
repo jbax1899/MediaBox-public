@@ -2,6 +2,8 @@
 
 Status: local-only reference
 
+This preserves an earlier troubleshooting record. It has no observation date and is not evidence that the hotspot currently has the same state.
+
 ## Summary
 
 The MediaBox hotspot is intended to run on the USB Wi-Fi dongle at `wlan1`, while onboard Wi-Fi and Ethernet stay available for LAN and headless SSH access.

@@ -19,13 +19,13 @@ See [planning/cleanup_plan.md](planning/cleanup_plan.md) for the current cleanup
 ## DONE (Observations/Findings)
 
 - Repo is mostly a documentation and launcher hub
-- `docs/system-map.md` is the current inventory of services and paths
+- `docs/system-map.md` is the canonical inventory of repository evidence and live-state questions
 - `docs/secret-boundaries.md` is the current local-only and secret boundary map
 - `reference/` is the factual record of the specific MediaBox build
-- Setup docs in: `README.md`, `docs/device_manual.md`, `docs/fdroid_readme.md`, `docs/kiwix_service_readme.md`, `ops/opencode/README.md`
-- The recent Docker cutovers are Jellyfin, F-Droid, File Browser, and Kiwix
-- The music discovery stack now has a checked-in Docker scaffold and a local Dashy section
-- Diskover CE now has a checked-in container scaffold under `ops/diskover`
-- `webretro` has a checked-in container scaffold; `novnc-vnc` stays on the host for now
-- OpenCode remains the PM2 host-side browser service
+- Setup docs in: `README.md`, `docs/device_manual.md`, `docs/fdroid_readme.md`, `ops/kiwix/README.md`, and `ops/opencode/README.md`
+- Jellyfin, F-Droid, File Browser, and Kiwix have checked-in Docker migration scaffolds; live cutover status is not established here
+- The music discovery stack has a checked-in Docker scaffold; its full acquisition workflow is intentionally outside this repository
+- Diskover CE has a checked-in container scaffold under `ops/diskover`
+- `webretro` has both a checked-in container scaffold and a historical host-PM2 entry; the active runtime needs verification
+- OpenCode has a checked-in PM2 configuration; deployment and boot enablement need verification
 - Older planning material lives in `planning/` and `drafts/`

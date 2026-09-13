@@ -33,4 +33,4 @@ docker compose -f compose.yml up -d
 - Keep the sync/update job outside the serving container until the migration finishes.
 - If the published path needs to stay `/fdroid`, keep the nginx alias in place rather than changing the repo layout.
 - If CORS needs to change later, adjust the nginx config without moving the content root.
-- The current live service returns `404` at `/` and `/fdroid`, and `200` at `/fdroid/`.
+- The recorded endpoint contract is `404` at `/` and `/fdroid`, and `200` at `/fdroid/`. This repository does not establish that the live service currently behaves that way.

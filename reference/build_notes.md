@@ -93,4 +93,4 @@ After assembly, a follow-up documentation update will diagram:
 
 ## Related Future Notes
 
-- `planning/extension_pi3_sensors_monitor.md` tracks the separate admin console and telemetry idea.
+- An earlier note referenced a separate admin-console and telemetry proposal, but that file is not present in this checkout. It is not current operating guidance.

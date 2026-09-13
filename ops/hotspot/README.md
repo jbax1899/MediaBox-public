@@ -2,6 +2,8 @@
 
 This directory tracks the bare `http://10.0.0.1` landing behavior for the MediaBox hotspot.
 
+This is a repository record of the intended host configuration, not proof that the hotspot is currently installed or working. The unit file executes a hard-coded `/opt/mediabox` path; verify that path against the live checkout before enabling the unit. The repository commonly documents the checkout as `~/MediaBox`, and this slice does not choose between them.
+
 Goal:
 
 - `10.0.0.1` should land on Dashy

@@ -31,7 +31,7 @@ docker compose -f compose.yml up -d
 ## Notes
 
 - This is the migration scaffold for the Jellyfin service.
-- Keep the PM2 service in place until the container has been validated.
+- Do not remove or stop any prior host service until live validation confirms that this container has replaced it.
 - If the upstream image or healthcheck command needs adjustment during validation, keep the runtime contract the same and change only the image-specific detail.
 - The `jellyfin-data` volume holds the config and database state; the host bind mount only keeps cache and media roots visible to the container.
 - Configure the Shokofin plugin to use `http://host.docker.internal:8111` so Jellyfin talks to the live Shoko container on the host bridge.

@@ -28,5 +28,5 @@ The container expects the archive directory to be mounted from a local host path
 ## Notes
 
 - This is the Docker migration scaffold for the Kiwix service.
-- Keep the PM2 service in place until the container has been validated.
+- Do not remove or stop any prior host service until live validation confirms that this container has replaced it.
 - If a maintained upstream Kiwix image becomes the better fit later, swap it into this scaffold and keep the startup contract intact.

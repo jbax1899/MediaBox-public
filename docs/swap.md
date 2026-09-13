@@ -1,8 +1,8 @@
 # Swap
 
-This note records the current swap setup on MediaBox.
+This note records a host inspection of the swap setup on MediaBox. It is not proof of the current live state; verify the host before treating these values as operational facts.
 
-## Current State
+## Recorded State
 
 - Root filesystem is `/dev/nvme0n1p2` on the NVMe drive.
 - The active swap device is `/swapfile`.

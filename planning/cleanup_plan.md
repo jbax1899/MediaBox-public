@@ -83,10 +83,10 @@ Clean up the repo documentation and organization first. Do not spend time making
 - Keep as writing/planning material only
 - Do not reference it from active operational docs unless needed
 
-### `planning/extension_pi3_sensors_monitor.md`
+### Sensor and monitoring extension reference
 
-- Keep as a future idea or extension proposal
-- Do not mix it into the current manual as if it were part of the active build
+- No `planning/extension_pi3_sensors_monitor.md` file is present in this checkout.
+- Do not treat the old reference to that path as an active proposal or current system component.
 
 ### `ops/opencode/README.md`
 

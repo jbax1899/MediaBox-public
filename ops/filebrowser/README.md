@@ -31,4 +31,4 @@ docker compose -f compose.yml up -d
 
 - Keep the database mounted so existing File Browser users and settings carry over.
 - If the root should be narrowed later, do that as a follow-up cleanup after the Docker cutover is stable.
-- The PM2 service has been removed; Docker is now the source of truth for File Browser.
+- This Compose file describes the intended Docker runtime. The repository does not prove that any prior host process was removed or that Docker is currently authoritative; verify the live process and database before changing either one.
