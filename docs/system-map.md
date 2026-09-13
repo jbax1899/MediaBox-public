@@ -60,9 +60,10 @@ The repository separates runtime state from checked-in definitions, but the exac
 
 | Data category | Repository examples | What must be supplied or verified |
 |---------------|---------------------|-----------------------------------|
-| Service state | Compose-local `./data` trees, Jellyfin's `jellyfin-data` volume, `/var/lib/ollama`, and historical service-state roots. | Which paths hold the live databases and whether they are backed up. |
+| Service state | Compose-local `./data` trees, Jellyfin's `jellyfin-data` volume, `/var/lib/ollama`, `/var/opt/minecraft/crafty/crafty-4`, and recorded roots such as `<service-state-root>/DiskoverData/{config,esdata}` and `<service-state-root>/MusicData/{lidarr,aurral,prowlarr,qbittorrent}`. | Which paths hold the live databases and whether they are backed up. |
 | Media and archives | `<media-root>/library`, `Music`, `MusicInbox`, `MusicAurral`, `KiwixArchives`, Anime, Incoming, and the Compose-local media/archive mounts. | Actual mount points, ownership, capacity, and library compatibility. |
-| Local configuration | Dashy, AnythingLLM, Shoko, launcher files, and local Compose files outside this repository. | Which checkout/configuration is authoritative. |
+| Local configuration | Recorded examples include `~/anythingllm/storage`, `~/Kavita/config`, `~/dashy/user-data/conf.yml`, `~/shoko/Shoko.CLI/settings-server.json`, `~/anythingllm/docker-compose.yml`, `~/shoko/docker-compose.yml`, and `~/start_vnc.sh`. | Which checkout/configuration is authoritative. These are examples from repository records, not verified current paths. |
+| Cache and logs | Recorded examples include `~/.cache/jellyfin`, `~/.local/share/jellyfin/log`, `~/beszel/beszel_agent_data`, `~/beszel/beszel_data`, `~/webretro/assets`, and `/var/log`. | Which paths are active, how fast they grow, and whether they are included in backups. |
 | Secrets and credentials | OpenCode environment/config, F-Droid signing material, provider credentials, and Gluetun's WireGuard file. | Presence and safe handling; do not export or publish secret contents. |
 
 A clean checkout provides documentation, Compose files, a few host launchers, and examples. It does not provide runtime data, media, databases, secrets, companion repositories, host packages, or proof that the documented paths exist. See [secret-boundaries.md](secret-boundaries.md) before adding local configuration.
