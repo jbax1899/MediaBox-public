@@ -11,6 +11,30 @@ This is the canonical inventory of MediaBox components, repository evidence, and
 
 The documented system is a hybrid: host networking and selected host services sit alongside external companion checkouts and several checked-in Docker scaffolds.
 
+## Current Mission Control observer evidence (2026-09-16)
+
+The following is a bounded read-only observation of the registered host. It is current evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
+
+| Subject | Evidence classification | Current evidence |
+|---------|------------------------|------------------|
+| Live host identity | **Confirmed live** | `host.summary` reported hostname `mediabox`, Debian GNU/Linux 12 (bookworm), kernel `6.12.93+rpt-rpi-2712`, and `aarch64`. |
+| Registered repository resource | **Confirmed live** | `repo.status` completed successfully for `repo:mediabox`; the controlled resource mapping is `/home/jordan/MediaBox`. |
+| Current Git branch and revision | **Confirmed live** | The registered checkout is on branch `main` at revision `daea4727e6528542e084ff30e8d5510309ee62da`. |
+| Current checkout cleanliness | **Confirmed live** | The registered checkout is dirty; 51 changed files were reported. Changed filenames were intentionally not collected. |
+| `/home/jordan/MediaBox` authority | **Inference** | The observer's `repo:mediabox` resource is configured to this path and the operation succeeded, but `repo.status` intentionally returns the resource ID rather than an absolute path. |
+| `/opt/mediabox` current relevance | **Unresolved** | The registered repository observation does not discover other checkouts or prove whether the historical `/opt/mediabox` path exists or is active. |
+| Selected storage | **Confirmed live** | `storage.summary` exposed only `/` on `/dev/nvme0n1p2`, with capacity `1007674732544` bytes and `95805628416` bytes available. |
+| Application persistence and backups | **Unresolved** | The selected storage result does not identify application data placement, backup jobs, archives, or restore health. |
+| `eth0` state | **Confirmed live** | `network.summary` reported `eth0` present but `down`, with no addresses returned. |
+| Hotspot topology | **Unresolved** | The observer does not expose routes, listeners, firewall/NAT state, Wi-Fi, hotspot behavior, or VPN topology. |
+| Systemd service state | **Unresolved** | `systemd.summary` completed with an empty result because the `service:mediabox` allowlist is intentionally empty. This is not evidence that no services are installed or running. |
+| `mediabox-hotspot-landing.service` live state | **Unresolved** | The repository path conflict remains documented; no service unit was authorized for live inspection. |
+| Docker/Compose runtime | **Unresolved** | Compose files remain repository representation only; this observer has no Docker capability. |
+| PM2 runtime | **Unresolved** | No PM2 operation is exposed by the observer. |
+| Timers, boot behavior, and logs | **Unresolved** | These are outside the current typed observer contract. |
+
+The live Git revision and dirty state above do not by themselves establish whether the checkout matches a historical working checkpoint. The observer confirms the selected checkout only; it does not search for stale or alternate deployments. Likewise, the `eth0` result does not contradict the existence of a documented hotspot design, but it does not provide current evidence that the design is active.
+
 ## App and source repositories
 
 | Category | Repository evidence | Deployment question |
