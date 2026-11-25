@@ -1,9 +1,9 @@
-# Beszel monitoring
+# Beszel
 
-The live Compose definition is maintained outside this repository. Keep its agent key, token, and host-specific paths out of Git.
+The live Compose file is maintained separately. Keep its key, token and host-specific paths out of Git.
 
-On 2026-11-24, the host-networked agent's hub target was corrected to loopback after the previous route timed out. Only `beszel-agent` was recreated, with dependencies and image pulls disabled. Its WebSocket connection and a new system sample were verified afterward. The live Compose backup remains in the root-only evidence directory.
+The host-networked agent connects to the hub over loopback. If collection stops, check this connection and the timestamp of the latest sample before recreating the agent.
 
-Beszel remains a low-privilege Docker agent; it has no NVMe device mapping or raw-I/O capabilities. The host-side daily SMART collector is documented in [storage](../storage/README.md).
+The agent does not have raw device access. NVMe SMART history is collected by the [host-side timer](../storage/README.md). Beszel must not depend on external media mounts.
 
-Alert configuration and notification delivery were deferred for this remediation phase.
+See the [system map](../../docs/system-map.md) for alert and deployment status.

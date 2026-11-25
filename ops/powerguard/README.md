@@ -1,11 +1,16 @@
-# PowerGuard consolidation
+# PowerGuard
 
-`auto-throttle.sh` preserves the current 5-second sampling loop, 400 MHz step-down, 200 MHz recovery step, 30-second stable period, and 1.2–2.6 GHz limits. `auto-throttle.test.sh` runs it against fixture sysfs and mocked `vcgencmd`, including multiple CPU policies.
+PowerGuard checks for undervoltage every five seconds. It lowers the CPU frequency cap by 400 MHz during undervoltage and raises it by 200 MHz after 30 seconds of stable power, within 1.2–2.6 GHz.
 
-On 2026-11-24, the live PowerGuard moved to `mediabox-powerguard.service`. The root and Jordan PM2 `pi-powerguard` entries were removed and saved out of both startup lists; their pre-handoff process and CPU-limit snapshots are kept in the host's root-only storage evidence directory. The systemd unit is enabled, active as root, and verified as the only PowerGuard process. The other Jordan PM2 applications remain online. The live policy was 2.6 GHz before handoff; the service later raised its cap through the same 2.4 GHz step used by the old controller and back to 2.6 GHz.
+Run `bash ops/powerguard/auto-throttle.test.sh` from the repository root to test the policy against mock CPU controls and `vcgencmd`.
 
-## Handoff and rollback
+## Moving from PM2 to systemd
 
-Before a future handoff, record `scaling_max_freq` for each CPU policy and save both PM2 process lists. In each manager's user context, run `pm2 delete pi-powerguard` and `pm2 save`; leave both PM2 systemd units and all unrelated applications running. Verify no PM2 PowerGuard process remains, then start the systemd unit and confirm it is the sole frequency controller.
+1. Record each CPU policy's `scaling_max_freq` and save both PM2 process configurations.
+2. In each manager's user context, run `pm2 delete pi-powerguard` followed by `pm2 save`. Leave unrelated PM2 apps running.
+3. Verify neither PM2 copy remains. Install `auto-throttle.sh` at `/usr/local/sbin/mediabox-auto-throttle` and the systemd unit under `/etc/systemd/system`.
+4. Reload systemd, enable and start `mediabox-powerguard.service`, and verify that it is the only frequency controller.
 
-To roll back, stop and disable `mediabox-powerguard.service`, restore the recorded frequency limits, and recreate one selected PM2 `pi-powerguard` entry from its pre-handoff configuration. Verify exactly one controller is active, then run `pm2 save` in that manager's context. Do not restore the full saved lists, use `pm2 kill`, or stop either PM2 service.
+## Rollback
+
+Stop and disable the systemd unit, restore the recorded CPU caps, and recreate one PM2 PowerGuard entry from its saved configuration. Verify that only one controller is running and save that manager's process list. Do not restore both saved lists or stop either PM2 daemon.

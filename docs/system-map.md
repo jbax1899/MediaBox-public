@@ -11,25 +11,23 @@ This is the canonical inventory of MediaBox components, repository evidence, and
 
 The documented system is a hybrid: host networking and selected host services sit alongside external companion checkouts and several checked-in Docker scaffolds.
 
-## Current remediation verification (2026-11-24)
+## Deployment status (2026-11-24)
 
-This section records the completed storage reliability phase and supersedes older deployment-status questions where the rows below provide newer evidence.
+| Component | Status |
+| --- | --- |
+| [Docker logging](../ops/docker/README.md) | Default: `local`, 10 MB × 3. Migrated Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI and Aurral. Dashy, VeraCrypt, Jellyfin, File Browser and both Beszel containers still use `json-file`. Reconcile their live Compose files before recreating them. |
+| [External storage](../ops/storage/README.md) | F-Droid, Kiwix, Shoko and Diskover are stopped with automatic restart disabled; the Kiwix scheduled job is suspended. The 2 TB drive has unresolved read errors. The 4 TB drive is absent; Shoko's guard awaits UUID and device verification. |
+| [PowerGuard](../ops/powerguard/README.md) and [PM2](../ops/pm2/README.md) | One systemd-managed PowerGuard instance; both PM2 startup lists no longer contain it. Log rotation runs every five minutes. |
+| NVMe and journal | Daily SMART collector enabled. Journal limited to 1 GiB and 14 days. |
+| [Music discovery](../ops/music-discovery/README.md) | Aurral connects to Lidarr through the existing host port; generated-download paths are aligned. VPN isolation preserved. |
+| Crafty | Minecraft startup restored from the previous configuration; Java's home-directory permission warning no longer appears. Discord bot login unconfirmed. |
+| [Beszel](../ops/beszel/README.md) | Collection restored; alerts and notification testing deferred. |
 
-| Subject | Verified live state |
-|---------|---------------------|
-| Docker logging | The daemon default is `local`, capped at 10 MB × 3 files. Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral were recreated with those limits. Dashy, VeraCrypt, Jellyfin, File Browser, and the Beszel hub and agent still use `json-file`; their live definitions were divergent, unmanaged, or deferred. |
-| External-storage services | F-Droid, Kiwix, Shoko, and Diskover remain stopped with automatic restart disabled. Shoko's guard units are prepared but not installed: the expected filesystem UUID and device names remain unverified. Direct Docker start or an explicit `external-storage` profile can bypass the guard. |
-| PowerGuard and PM2 logs | PowerGuard is a single active systemd service; neither saved PM2 process list contains its prior duplicate. PM2 log rotation is enabled on a five-minute timer. |
-| NVMe monitoring | The daily SMART snapshot timer is enabled and a current sample was recorded successfully. Its root-only history is operational monitoring, not a disk diagnosis. |
-| Music discovery | Aurral's Lidarr connection test succeeded through the existing host route. Lidarr and Aurral see the same generated-download directory; Lidarr, Prowlarr, and qBittorrent remain in Gluetun's network namespace. |
-| Crafty / Minecraft | Crafty is healthy. The affected server's prior Discord-MC-Chat token and channel values were restored from its known-good backup, and a dedicated `/home/crafty` bind is available to the Java child user. After it was started through Crafty, the Java process ran as UID 1000:GID 0 and the log reached Minecraft's normal ready marker; the prior `/home/crafty` permission warning was absent. No Discord authentication error appeared, but bot login itself was not confirmed. |
-| Beszel alerts | Alert configuration and notification delivery were deferred. |
+Root capacity remains tight. External-drive backup and recovery are separate maintenance tasks. The live Compose files and host-only configuration are not replaced by this repository's reference definitions.
 
-The Docker daemon restart interrupted running containers briefly; the daemon and managed services recovered. No external-storage transfer, filesystem repair, disk stress test, or physical drive change was performed. See [storage operations](../ops/storage/README.md), [Docker logging](../ops/docker/README.md), and [PM2 rotation](../ops/pm2/README.md) for deployment and rollback details.
+## Mission Control observer evidence (2026-09-16)
 
-## Current Mission Control observer evidence (2026-09-16)
-
-The following is a bounded read-only observation of the registered host. It is current evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
+The following is a bounded read-only observation of the registered host. It is historical evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
 
 | Subject | Evidence classification | Current evidence |
 |---------|------------------------|------------------|

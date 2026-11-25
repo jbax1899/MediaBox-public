@@ -1,15 +1,17 @@
 # Docker logging
 
-`daemon.json` sets the `local` logging driver with 10 MB files and three retained files as the live Docker default. Existing containers keep their current driver until they are recreated with an explicit Compose logging setting.
+Use Docker's `local` driver with 10 MB files and three retained files. The daemon settings are in [daemon.json](daemon.json). Existing containers keep their logging configuration until recreated. Use `docker logs` rather than reading the driver's internal files.
 
-For live services whose Compose source diverges from this checkout, keep the mount and network reconciliation in root-only host overrides under `/etc/mediabox-storage/compose-overrides`; do not replace the dirty MediaBox checkout with this scaffold. For unrelated services, recreate one service at a time with its recorded Compose files, `--no-deps`, and `--pull never`; save a short root-only log tail first. For a Gluetun replacement, stop qBittorrent, Lidarr, and Prowlarr first, recreate Gluetun, wait for VPN readiness, then recreate all three namespace clients. Recreate the Gluetun WebUI after the gateway if its connection needs refreshing. Use the same order during rollback; do not start namespace clients against a removed or unready gateway. Leave suspended services stopped; their prepared per-service logging takes effect on their next deliberate start.
+## Deployment
 
-The live daemon was restarted on 2026-11-24. Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral were recreated with `local` logging capped at 10 MB × 3. qBittorrent, Lidarr, and Prowlarr still share Gluetun's network namespace. Crafty also has a narrow `/home/crafty` bind for its Java child process. F-Droid, Kiwix, Shoko, and Diskover remain stopped with restart disabled.
+- Back up the existing daemon configuration before applying the default. A Docker restart interrupts running containers unless live-restore is enabled.
+- Check the live Compose files, mounts and networks before recreating a service. Keep host-specific overrides in the root-only `/etc/mediabox-storage/compose-overrides` directory.
+- Save any needed log excerpts privately, then recreate one service at a time with `--no-deps` and `--pull never`. Leave suspended services stopped.
 
-Dashy, VeraCrypt, Jellyfin, File Browser, and the Beszel hub and agent still use `json-file`; their live Compose source was divergent, unmanaged, or deferred, so they were not recreated. Suspended containers also retain their existing driver until a controlled Compose start. Do not blindly apply the repository Compose scaffolds to these live services.
-
-Restarting Docker applies the daemon default and interrupts running containers unless live-restore is enabled. The brief restart on 2026-11-24 was followed by service recovery; the daemon reported `local` as its default. The daemon default alone does not convert existing containers.
+Gluetun is an exception: stop qBittorrent, Lidarr and Prowlarr before recreating the gateway. Wait for VPN readiness, then recreate all three clients so they join the new network namespace. Refresh the WebUI if needed. Follow the same order during rollback.
 
 ## Rollback
 
-Before the restart, `/etc/docker/daemon.json` did not exist. If the daemon fails to start after a logging change, remove only the newly added file and restart Docker; this restores the prior daemon default. That does not change the logging driver stored on already-created containers. Revert a per-service override only after saving the current live Compose source and mounts; recreate just that service with image pulls and dependency recreation disabled. If reverting Gluetun, stop its namespace clients first and recreate them only after the restored gateway is healthy. Root-only pre-recreation log tails are kept in the host's storage evidence directory.
+Restore the previous daemon configuration (or remove the new file if none existed) and restart Docker. To revert a service-specific change, restore its previous Compose settings and recreate it without pulling images or starting dependencies. Restoring the daemon defaults does not change existing containers.
+
+See the [system map](../../docs/system-map.md) for the current rollout status.

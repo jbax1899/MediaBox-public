@@ -1,21 +1,34 @@
-# External storage guard
+# Storage protection
 
-`require-mount.sh` is a host-side preflight for a service that must use a specific filesystem. Call it with the exact absolute mountpoint and its expected UUID before starting that service's Compose project. It fails closed when the path is not itself a mountpoint, when the UUID cannot be read, or when the mounted UUID differs. Keep machine UUIDs in the host's systemd unit or environment file, not in this repository.
+## External drives
 
-Use Compose long bind syntax with `bind.create_host_path: false` for required external paths. This prevents Compose from creating a missing source directory on `/`; it does not prove which filesystem backs an existing path. The Shoko scaffold applies that missing-path protection to its media binds. The live fstab entry expects a UUID at `/mnt/4TB`, but the device is absent, so its identity and mount options still need confirmation before wiring the live deployment to the guard.
+Before starting a service that uses external storage, run `require-mount.sh /absolute/mountpoint expected-uuid`. It checks that the exact path is mounted and the filesystem UUID matches. Use Compose bind mounts with `create_host_path: false` to prevent missing source directories from being created on the root disk. This option alone does not verify the filesystem behind an existing directory.
 
-The Shoko service units in this folder show the guarded lifecycle: startup requires `mnt-4TB.mount`, the independent kernel-error watcher, and a UUID preflight; mount loss stops the Compose-owned service, and a kernel I/O error triggers a separate containment unit. Both failure units remain failed until an operator checks the disk; recovery is manual after confirming the UUID, mount, and storage health. Beszel has no dependency on the external mount. Install the units only after the actual filesystem and device names are confirmed, with a root-only `/etc/mediabox-storage/shoko.env` containing `SHOKO_MEDIA_UUID`, `SHOKO_STORAGE_DEVICES`, and `SHOKO_COMPOSE_FILE`. Keep the machine-specific Compose path in that host-only file. The live Shoko container is stopped, opted into an explicit Compose profile, set to no automatic restart, and its external binds no longer create missing directories. The systemd guard remains undeployed until the expected filesystem is physically present and verified.
+Shoko requires its media drive at `/mnt/4TB`. Install the guard units only after confirming the filesystem UUID and kernel device names. Create a root-only `/etc/mediabox-storage/shoko.env` with:
 
-The profile and restart policy block ordinary project startup and Docker daemon restart. A deliberate administrator can still bypass UUID validation with `docker start shokoserver` or an explicit `docker compose --profile external-storage up`; use the guarded systemd unit for recovery after the disk identity is verified.
+- `SHOKO_MEDIA_UUID`: expected filesystem UUID.
+- `SHOKO_STORAGE_DEVICES`: comma-separated kernel device and partition names.
+- `SHOKO_COMPOSE_FILE`: absolute path to the live Compose file.
 
-At runtime, a mounted filesystem can still return I/O errors. `detect-kernel-error.sh` watches a kernel journal stream for medium/I/O errors on an explicit comma-separated list of a device and its partitions, then exits nonzero. `mediabox-storage-watch-shoko.service` runs it behind `journalctl -kf --since now --no-pager`; its `OnFailure` unit stops Shoko through systemd. The failed watcher remains visible for manual recovery. Do not treat a periodic successful `stat` or a healthy container check as proof that all sectors are readable. Keep F-Droid stopped while its source disk is under investigation.
+Install the guard scripts under `/usr/local/lib/mediabox` and the three Shoko units under `/etc/systemd/system`. See [Shoko](../shoko/README.md) for startup instructions.
 
-`nvme-snapshot.sh` records cumulative writes, the daily write delta, wear, spare, temperature, unsafe shutdowns, critical warnings, and media errors in a root-only state directory. It is installed on MediaBox with `nvme-cli`; `nvme-snapshot.timer` is enabled daily and retains the header plus 400 samples. The root-only CSV is `/var/lib/mediabox-storage/nvme-health.csv`; a fresh one-shot completed successfully on 2026-11-24. The script reads `/dev/nvme0` by default; set a machine-local override only if the device name changes. The CSV is an operational trend, not a disk-health diagnosis.
+The Shoko unit requires the mount and its kernel-error watcher. Mount loss stops the service. If the watcher detects a medium or I/O error on a configured device, its failure handler stops Shoko. Check the drive and failed units before manually restarting; a successful file listing or health check does not establish disk health. Beszel must remain independent of the external mount.
 
-`ops/powerguard` contains the systemd-managed replacement for the existing PM2 CPU throttle loop. The live unit is enabled and active as root; the root and Jordan PM2 copies are removed from their saved process lists, and exactly one PowerGuard process remains. See its runbook for the single-controller handoff and rollback.
+## NVMe monitoring
 
-The Docker daemon now defaults to the `local` driver with 10 MB files and three retained files. Recreated services with matching live definitions use the same per-service cap: Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral. Existing `json-file` logging remains on Dashy, VeraCrypt, Jellyfin, File Browser, Beszel, and containers left suspended. Their live Compose definitions were not safely reconciled or (for Beszel) were explicitly deferred, so do not recreate them from this repository scaffold. F-Droid, Kiwix, Shoko, and Diskover remain stopped with restart disabled.
+Install `nvme-cli`, place `nvme-snapshot.sh` under `/usr/local/lib/mediabox`, install the associated systemd service and timer, and enable `nvme-snapshot.timer`.
 
-PM2 application and daemon logs are covered by `/etc/logrotate.d/mediabox-pm2`; the five-minute `mediabox-pm2-logrotate.timer` is enabled. See [the PM2 runbook](../pm2/README.md).
+The daily snapshot records cumulative host writes, writes since the last sample, wear, available spare, unsafe shutdowns, temperature, critical warnings and media errors. It retains 400 samples in the root-only `/var/lib/mediabox-storage/nvme-health.csv`. The default device is `/dev/nvme0`; override `MEDIABOX_NVME_DEVICE` locally if needed. These readings help track trends but do not guarantee drive health.
 
-The storage and PowerGuard checks use fixtures. Run `bash ops/storage/require-mount.test.sh`, `bash ops/storage/nvme-snapshot.test.sh`, and `bash ops/powerguard/auto-throttle.test.sh`; none reads or changes live CPU frequency controls or host disks. The `local` Docker logging driver remains readable via `docker logs`, but its internal files should not be consumed directly by host tools. A deliberate administrator can still bypass external-storage protection with `docker start shokoserver` or `docker compose --profile external-storage up`; the Shoko guard units remain undeployed until the expected filesystem UUID and device names are verified. The related machine-local prerequisite is `/etc/mediabox-storage/shoko.env`, which holds the expected UUID and device list with root-only access.
+## Tests
+
+From the repository root:
+
+```bash
+bash ops/storage/require-mount.test.sh
+bash ops/storage/nvme-snapshot.test.sh
+```
+
+Both suites use fixtures and do not access host disks.
+
+See the [system map](../../docs/system-map.md) for deployment status and the [Docker](../docker/README.md), [PM2](../pm2/README.md) and [PowerGuard](../powerguard/README.md) runbooks for related maintenance.

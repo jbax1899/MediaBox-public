@@ -1,7 +1,12 @@
 # PM2 log rotation
 
-The live host logrotate policy applies five-minute checks and a 10 MB trigger to PM2 application logs, retaining seven compressed rotations. PM2 daemon logs have a 100 MB trigger and three rotations. The policy file remains host-specific because it names the two PM2 homes.
+The host uses logrotate to check PM2 logs every five minutes:
 
-The checked-in service and timer are installed under `/etc/systemd/system`; the timer is enabled and active. `systemd-analyze verify` passed, `logrotate -d` completed against the live state file, and a disposable 11 MiB fixture confirmed both PM2 application logs rotate and truncate. The timer and root-owned logrotate service survive reboot. Run the rotation fixture before installing on another host.
+| Logs | Size trigger | Retained rotations |
+| --- | --- | --- |
+| Application | 10 MB | 7 (compressed) |
+| Daemon | 100 MB | 3 |
 
-The two PM2 managers remain independent. Removing one app must use `pm2 delete <app>` and `pm2 save` in that manager's user context; never stop the whole PM2 daemon when changing one managed process.
+Keep the policy at `/etc/logrotate.d/mediabox-pm2` host-specific so it matches both PM2 homes. Install the service and timer under `/etc/systemd/system`, reload systemd, and enable `mediabox-pm2-logrotate.timer`. Check the policy with `logrotate -d` and test rotation on disposable logs before deploying it.
+
+The size limits are checked periodically, not enforced continuously. To remove an app permanently, run `pm2 delete <app>` and `pm2 save` in the appropriate manager's user context without stopping its other apps.

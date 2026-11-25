@@ -1,19 +1,19 @@
-# Shoko Docker Compose Configuration
+# Shoko
 
-This folder keeps the checked-in reference shape for the container.
+[compose.yml](compose.yml) is the reference container configuration.
 
-## Files
+- State is stored in `./data`, including the local `settings-server.json`.
+- Shoko listens on port `8111`. Jellyfin can reach it at `http://host.docker.internal:8111`.
+- The entrypoint runs through Bash because the image's script lacks execute permission.
 
-- [compose.yml](compose.yml)
+## Startup
 
-## Runtime Notes
+Shoko uses the `external-storage` Compose profile and has automatic restart disabled. Keep it stopped until the required media drive is verified and the [storage guard](../storage/README.md) is installed and configured.
 
-The checked-in Compose file places Shoko behind the `external-storage` profile and uses `restart: "no"`. Do not start it with Compose directly. After the guard units are installed, the root-only environment file is configured, and the required filesystem UUID and device list are verified, start it with `sudo systemctl start mediabox-shoko.service`. The live deployment uses a separate machine-local Compose file whose path belongs in the root-only guard environment file. Its paths and profile are aligned, while the actual filesystem UUID still needs confirmation before installing the guard unit.
+Start it through systemd:
 
-The active runtime:
+```bash
+sudo systemctl start mediabox-shoko.service
+```
 
-- Mounts the existing host state tree from a local `./data` directory
-- Publishes Shoko on host port `8111`
-- Reads the existing credentials from a local `settings-server.json` file
-- Should be reached from Jellyfin with `http://host.docker.internal:8111`
-- The compose file invokes `/bin/bash /docker-entrypoint.sh` because this image tag ships that script without execute permission.
+Direct Docker startup or explicitly enabling the Compose profile bypasses the mount check. Use the live Compose file in the guard configuration rather than assuming the reference file matches the host.
