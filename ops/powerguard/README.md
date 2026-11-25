@@ -6,6 +6,6 @@ On 2026-11-24, the live PowerGuard moved to `mediabox-powerguard.service`. The r
 
 ## Handoff and rollback
 
-Before a future handoff, record `scaling_max_freq` for each CPU policy and save the two PM2 process lists. Stop only the `pi-powerguard` entry in the root and Jordan PM2 homes, leaving both PM2 systemd units and all unrelated applications running. Verify no PM2 PowerGuard process remains, then start the systemd unit and confirm it is the sole frequency controller.
+Before a future handoff, record `scaling_max_freq` for each CPU policy and save both PM2 process lists. In each manager's user context, run `pm2 delete pi-powerguard` and `pm2 save`; leave both PM2 systemd units and all unrelated applications running. Verify no PM2 PowerGuard process remains, then start the systemd unit and confirm it is the sole frequency controller.
 
-To roll back, stop and disable `mediabox-powerguard.service`, restore the recorded frequency limits, and restart one selected PM2 `pi-powerguard` entry. Keep the other copy stopped, verify exactly one controller is active, and confirm the other PM2 applications remain running. Do not use `pm2 kill` or stop either whole PM2 service.
+To roll back, stop and disable `mediabox-powerguard.service`, restore the recorded frequency limits, and recreate one selected PM2 `pi-powerguard` entry from its pre-handoff configuration. Verify exactly one controller is active, then run `pm2 save` in that manager's context. Do not restore the full saved lists, use `pm2 kill`, or stop either PM2 service.

@@ -12,6 +12,7 @@ sysfs_root=${POWERGUARD_SYSFS_ROOT:-/sys/devices/system/cpu}
 cycles=${POWERGUARD_TEST_CYCLES:-0}
 
 get_freq() { awk '{print $1}' "$sysfs_root/cpu0/cpufreq/scaling_cur_freq"; }
+get_max_freq() { awk '{print $1}' "$sysfs_root/cpu0/cpufreq/scaling_max_freq"; }
 set_freq() {
   local freq=$1
   local path
@@ -27,7 +28,7 @@ set_freq() {
   logger -t "$log_tag" "CPU max frequency set to ${freq}kHz (current ${current_freq}kHz)"
 }
 
-current_freq=$(get_freq)
+current_freq=$(get_max_freq)
 last_undervolt=0
 stable_since=$(date +%s)
 count=0
@@ -35,13 +36,13 @@ while :; do
   throttled=$(vcgencmd get_throttled | cut -d= -f2)
   now=$(date +%s)
   if (( (throttled & 1) != 0 )); then
+    stable_since=$now
     if (( now - last_undervolt > 2 )); then
       next_freq=$((current_freq - step_down))
       (( next_freq < min_freq )) && next_freq=$min_freq
       if (( next_freq < current_freq )); then
         set_freq "$next_freq"
         current_freq=$next_freq
-        stable_since=$now
       fi
       last_undervolt=$now
     fi
