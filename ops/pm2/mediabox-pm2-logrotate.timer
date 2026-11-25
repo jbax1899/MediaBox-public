@@ -1,0 +1,11 @@
+[Unit]
+Description=Check MediaBox PM2 log sizes every five minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Unit=mediabox-pm2-logrotate.service
+
+[Install]
+WantedBy=timers.target

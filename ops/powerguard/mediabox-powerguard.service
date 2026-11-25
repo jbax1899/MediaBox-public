@@ -1,0 +1,14 @@
+[Unit]
+Description=MediaBox CPU power and thermal guard
+After=local-fs.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/mediabox-auto-throttle
+Restart=on-failure
+RestartSec=5s
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

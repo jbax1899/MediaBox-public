@@ -1,0 +1,6 @@
+[Unit]
+Description=Rotate MediaBox PM2 logs
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate --state /var/lib/logrotate/mediabox-pm2.status /etc/logrotate.d/mediabox-pm2
