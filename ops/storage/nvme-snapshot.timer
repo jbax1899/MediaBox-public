@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily MediaBox NVMe SMART snapshot
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15m
+Unit=nvme-snapshot.service
+
+[Install]
+WantedBy=timers.target

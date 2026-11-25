@@ -14,6 +14,8 @@ The live container:
 docker compose -f compose.yml up -d
 ```
 
+The checked-in Compose file places Shoko behind the `external-storage` profile and uses `restart: "no"`; Shoko should be started by the host-side guard unit only after the required filesystem is mounted and its UUID passes the preflight. The live deployment uses a separate Compose file at `/home/jordan/shoko/docker-compose.yml`; its paths and profile are now aligned, while the actual filesystem UUID still needs confirmation before installing the guard unit.
+
 The active runtime:
 
 - Mounts the existing host state tree from a local `./data` directory

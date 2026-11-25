@@ -1,0 +1,6 @@
+[Unit]
+Description=Stop Shoko after an external storage guard failure
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl stop mediabox-shoko.service

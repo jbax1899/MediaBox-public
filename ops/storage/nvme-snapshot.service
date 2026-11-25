@@ -1,0 +1,10 @@
+[Unit]
+Description=Record MediaBox NVMe SMART health
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/mediabox/nvme-snapshot.sh
+User=root
+Group=root
+UMask=0077

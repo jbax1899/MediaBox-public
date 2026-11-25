@@ -1,0 +1,13 @@
+[Unit]
+Description=Watch kernel storage errors affecting Shoko
+After=systemd-journald.service
+OnFailure=mediabox-storage-contain-shoko.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/mediabox-storage/shoko.env
+ExecStart=/bin/bash -o pipefail -c '/usr/bin/journalctl -kf --since now --no-pager | /usr/local/lib/mediabox/detect-kernel-error.sh "${SHOKO_STORAGE_DEVICES}"'
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
