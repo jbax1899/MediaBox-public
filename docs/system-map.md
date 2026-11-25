@@ -11,6 +11,22 @@ This is the canonical inventory of MediaBox components, repository evidence, and
 
 The documented system is a hybrid: host networking and selected host services sit alongside external companion checkouts and several checked-in Docker scaffolds.
 
+## Current remediation verification (2026-11-24)
+
+This section records the completed storage reliability phase and supersedes older deployment-status questions where the rows below provide newer evidence.
+
+| Subject | Verified live state |
+|---------|---------------------|
+| Docker logging | The daemon default is `local`, capped at 10 MB × 3 files. Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral were recreated with those limits. Dashy, VeraCrypt, Jellyfin, File Browser, and Beszel still use `json-file`; their live definitions were divergent, unmanaged, or deferred. |
+| External-storage services | F-Droid, Kiwix, Shoko, and Diskover remain stopped with automatic restart disabled. Shoko's guard units are prepared but not installed: the expected filesystem UUID and device names remain unverified. Direct Docker start or an explicit `external-storage` profile can bypass the guard. |
+| PowerGuard and PM2 logs | PowerGuard is a single active systemd service; neither saved PM2 process list contains its prior duplicate. PM2 log rotation is enabled on a five-minute timer. |
+| NVMe monitoring | The daily SMART snapshot timer is enabled and a current sample was recorded successfully. Its root-only history is operational monitoring, not a disk diagnosis. |
+| Music discovery | Aurral's Lidarr connection test succeeded through the existing host route. Lidarr and Aurral see the same generated-download directory; Lidarr, Prowlarr, and qBittorrent remain in Gluetun's network namespace. |
+| Crafty / Minecraft | Crafty is healthy. The affected server's prior Discord-MC-Chat token and channel values were restored from its known-good backup, and a dedicated `/home/crafty` bind is available to the Java child user. Server startup still needs verification through Crafty because it is not auto-started. |
+| Beszel alerts | Alert configuration and notification delivery were deferred. |
+
+The Docker daemon restart interrupted running containers briefly; the daemon and managed services recovered. No external-storage transfer, filesystem repair, disk stress test, or physical drive change was performed. See [storage operations](../ops/storage/README.md), [Docker logging](../ops/docker/README.md), and [PM2 rotation](../ops/pm2/README.md) for deployment and rollback details.
+
 ## Current Mission Control observer evidence (2026-09-16)
 
 The following is a bounded read-only observation of the registered host. It is current evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
