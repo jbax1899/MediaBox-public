@@ -34,7 +34,7 @@ docker compose -f compose.yml up -d
 Prowlarr and Lidarr stay on the normal Docker network.
 
 By default Aurral publishes on host port `3002` if `3001` is already taken.
-When connecting Aurral to Lidarr, use `http://lidarr:8686` from inside Aurral.
+When Aurral and Lidarr share the default Compose network, use `http://lidarr:8686` from inside Aurral. In the live deployment Lidarr shares Gluetun's network namespace, so Aurral cannot resolve the `lidarr` service name. The existing Gluetun host port `8686` is reachable from Aurral at `http://host.docker.internal:8686`; that route was checked without adding a port or moving Lidarr outside Gluetun. Keep Aurral's and Lidarr's download paths aligned on the same host directory, or add a Lidarr remote path mapping if the container paths differ.
 When connecting Prowlarr to Lidarr, use `http://lidarr:8686` and `http://prowlarr:9696`.
 When Lidarr connects to qBittorrent, use `http://host.docker.internal:8098` from inside the container.
 Use the current qBittorrent WebUI password, not any temporary first-boot credential.

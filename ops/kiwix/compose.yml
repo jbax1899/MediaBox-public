@@ -1,5 +1,12 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   kiwix-serve:
+    logging: *bounded-logging
     container_name: kiwix-serve
     build:
       context: .
@@ -11,7 +18,7 @@ services:
       KIWIX_ARCHIVE_PATH: /archive
       KIWIX_PORT: "9191"
     init: true
-    restart: unless-stopped
+    restart: "no"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9191/"]
       interval: 30s

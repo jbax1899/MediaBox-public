@@ -1,5 +1,12 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   diskover:
+    logging: *bounded-logging
     image: lscr.io/linuxserver/diskover:latest
     container_name: diskover
     environment:
@@ -35,6 +42,7 @@ services:
       - diskover
 
   elasticsearch:
+    logging: *bounded-logging
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
     container_name: diskover-elasticsearch
     environment:

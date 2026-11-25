@@ -1,5 +1,12 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   gluetun:
+    logging: *bounded-logging
     image: qmcgaw/gluetun:latest
     container_name: gluetun
     cap_add:
@@ -19,6 +26,7 @@ services:
     restart: unless-stopped
 
   gluetun-webui:
+    logging: *bounded-logging
     image: scuzza/gluetun-webui:latest
     container_name: gluetun-webui
     depends_on:
@@ -40,6 +48,7 @@ services:
       - /tmp
 
   qbittorrent:
+    logging: *bounded-logging
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     network_mode: service:gluetun

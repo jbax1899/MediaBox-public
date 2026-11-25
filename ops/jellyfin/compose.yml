@@ -1,5 +1,12 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   jellyfin:
+    logging: *bounded-logging
     image: jellyfin/jellyfin:latest
     container_name: jellyfin
     environment:
