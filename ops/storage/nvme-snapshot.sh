@@ -4,7 +4,7 @@ set -euo pipefail
 state_dir=${MEDIABOX_STORAGE_STATE_DIR:-/var/lib/mediabox-storage}
 device=${MEDIABOX_NVME_DEVICE:-/dev/nvme0}
 mkdir -p -- "$state_dir"
-snapshot=$(nvme smart-log "$device")
+snapshot=$(LC_ALL=C nvme smart-log "$device")
 
 value() {
   local key=$1
@@ -30,9 +30,28 @@ used=$(value percentage_used)
 spare=$(value available_spare)
 unsafe=$(value unsafe_shutdowns)
 temperature=$(value temperature)
-critical=$(value critical_warning)
+critical_raw=$(awk -F: '
+  {
+    label = tolower($1)
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", label)
+    if (label == "critical_warning") {
+      value = $2
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      print value
+      exit
+    }
+  }
+' <<<"$snapshot")
+if [[ "$critical_raw" =~ ^0[xX]([[:xdigit:]]+)$ ]]; then
+  critical=$((16#${BASH_REMATCH[1]}))
+elif [[ "$critical_raw" =~ ^[0-9]+$ ]]; then
+  critical=$((10#$critical_raw))
+else
+  echo "nvme snapshot: missing or invalid critical_warning value" >&2
+  exit 1
+fi
 media_errors=$(value media_errors)
-for number in "$data_units" "$used" "$spare" "$unsafe" "$temperature" "$critical" "$media_errors"; do
+for number in "$data_units" "$used" "$spare" "$unsafe" "$temperature" "$media_errors"; do
   [[ "$number" =~ ^[0-9]+$ ]] || { echo "nvme snapshot: missing or invalid SMART value" >&2; exit 1; }
 done
 

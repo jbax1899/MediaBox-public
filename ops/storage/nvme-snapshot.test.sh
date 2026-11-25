@@ -5,11 +5,12 @@ tmp=$(mktemp -d)
 trap 'rm -rf -- "$tmp"' EXIT
 cat >"$tmp/nvme" <<'EOF'
 #!/usr/bin/env bash
+[[ ${LC_ALL:-} == C ]] || exit 2
 cat "$NVME_FIXTURE"
 EOF
 chmod +x "$tmp/nvme"
 cat >"$tmp/smart.log" <<'EOF'
-critical_warning                    : 0
+critical_warning                    : 0x0
 temperature                         : 29°C (302 Kelvin)
 available_spare                     : 40%
 percentage_used                     : 2%
@@ -22,6 +23,15 @@ sed -i 's/34403686/34405686/' "$tmp/smart.log"
 MEDIABOX_STORAGE_STATE_DIR="$tmp/state" PATH="$tmp:$PATH" NVME_FIXTURE="$tmp/smart.log" bash "$root/ops/storage/nvme-snapshot.sh"
 [[ $(wc -l <"$tmp/state/nvme-health.csv") -eq 3 ]]
 [[ $(tail -n 1 "$tmp/state/nvme-health.csv" | cut -d, -f3) == 1.024 ]]
+sed -i 's/0x0/0x4/' "$tmp/smart.log"
+MEDIABOX_STORAGE_STATE_DIR="$tmp/state" PATH="$tmp:$PATH" NVME_FIXTURE="$tmp/smart.log" bash "$root/ops/storage/nvme-snapshot.sh"
+[[ $(tail -n 1 "$tmp/state/nvme-health.csv" | cut -d, -f8) == 4 ]]
+sed -i 's/0x4/0xG/' "$tmp/smart.log"
+if MEDIABOX_STORAGE_STATE_DIR="$tmp/state" PATH="$tmp:$PATH" NVME_FIXTURE="$tmp/smart.log" bash "$root/ops/storage/nvme-snapshot.sh" >/dev/null 2>&1; then
+  echo "invalid critical warning should fail" >&2
+  exit 1
+fi
+sed -i 's/0xG/0x4/' "$tmp/smart.log"
 for ((i = 0; i < 405; i++)); do printf '2026-01-01T00:00:%02dZ,1,0,1,1,1,1,0,0\n' "$((i % 60))" >>"$tmp/state/nvme-health.csv"; done
 MEDIABOX_STORAGE_STATE_DIR="$tmp/state" PATH="$tmp:$PATH" NVME_FIXTURE="$tmp/smart.log" bash "$root/ops/storage/nvme-snapshot.sh"
 [[ $(wc -l <"$tmp/state/nvme-health.csv") -eq 401 ]]
