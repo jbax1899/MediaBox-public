@@ -17,7 +17,7 @@ This section records the completed storage reliability phase and supersedes olde
 
 | Subject | Verified live state |
 |---------|---------------------|
-| Docker logging | The daemon default is `local`, capped at 10 MB × 3 files. Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral were recreated with those limits. Dashy, VeraCrypt, Jellyfin, File Browser, and Beszel still use `json-file`; their live definitions were divergent, unmanaged, or deferred. |
+| Docker logging | The daemon default is `local`, capped at 10 MB × 3 files. Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI, and Aurral were recreated with those limits. Dashy, VeraCrypt, Jellyfin, File Browser, and the Beszel hub and agent still use `json-file`; their live definitions were divergent, unmanaged, or deferred. |
 | External-storage services | F-Droid, Kiwix, Shoko, and Diskover remain stopped with automatic restart disabled. Shoko's guard units are prepared but not installed: the expected filesystem UUID and device names remain unverified. Direct Docker start or an explicit `external-storage` profile can bypass the guard. |
 | PowerGuard and PM2 logs | PowerGuard is a single active systemd service; neither saved PM2 process list contains its prior duplicate. PM2 log rotation is enabled on a five-minute timer. |
 | NVMe monitoring | The daily SMART snapshot timer is enabled and a current sample was recorded successfully. Its root-only history is operational monitoring, not a disk diagnosis. |
