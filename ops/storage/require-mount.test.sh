@@ -67,6 +67,7 @@ fi
 grep -q '^Requires=docker.service mnt-4TB.mount mediabox-storage-watch-shoko.service$' "$root/ops/storage/mediabox-shoko.service"
 grep -q '^BindsTo=mnt-4TB.mount$' "$root/ops/storage/mediabox-shoko.service"
 grep -q '^Restart=no$' "$root/ops/storage/mediabox-shoko.service"
+grep -q 'docker compose -f ${SHOKO_COMPOSE_FILE}' "$root/ops/storage/mediabox-shoko.service"
 grep -q '^OnFailure=mediabox-storage-contain-shoko.service$' "$root/ops/storage/mediabox-storage-watch-shoko.service"
 grep -q 'profiles: \[external-storage\]' "$root/ops/shoko/compose.yml"
 grep -q 'restart: "no"' "$root/ops/shoko/compose.yml"

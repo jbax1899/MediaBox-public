@@ -9,8 +9,8 @@ OnFailure=mediabox-storage-contain-shoko.service
 Type=simple
 EnvironmentFile=/etc/mediabox-storage/shoko.env
 ExecStartPre=/usr/local/lib/mediabox/require-mount.sh /mnt/4TB ${SHOKO_MEDIA_UUID}
-ExecStart=/usr/bin/docker compose -f /home/jordan/shoko/docker-compose.yml --profile external-storage up --no-deps shoko
-ExecStop=/usr/bin/docker compose -f /home/jordan/shoko/docker-compose.yml --profile external-storage stop --timeout 20 shoko
+ExecStart=/usr/bin/docker compose -f ${SHOKO_COMPOSE_FILE} --profile external-storage up --no-deps shoko
+ExecStop=/usr/bin/docker compose -f ${SHOKO_COMPOSE_FILE} --profile external-storage stop --timeout 20 shoko
 Restart=no
 TimeoutStopSec=30s
 
