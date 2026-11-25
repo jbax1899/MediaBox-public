@@ -11,9 +11,23 @@ This is the canonical inventory of MediaBox components, repository evidence, and
 
 The documented system is a hybrid: host networking and selected host services sit alongside external companion checkouts and several checked-in Docker scaffolds.
 
-## Current Mission Control observer evidence (2026-09-16)
+## Deployment status (2026-11-24)
 
-The following is a bounded read-only observation of the registered host. It is current evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
+| Component | Status |
+| --- | --- |
+| [Docker logging](../ops/docker/README.md) | Default: `local`, 10 MB × 3. Migrated Crafty, Ollama, AnythingLLM, Navidrome, Gluetun, qBittorrent, Lidarr, Prowlarr, Gluetun WebUI and Aurral. Dashy, VeraCrypt, Jellyfin, File Browser and both Beszel containers still use `json-file`. Reconcile their live Compose files before recreating them. |
+| [External storage](../ops/storage/README.md) | F-Droid, Kiwix, Shoko and Diskover are stopped with automatic restart disabled; the Kiwix scheduled job is suspended. The 2 TB drive has unresolved read errors. The 4 TB drive is absent; Shoko's guard awaits UUID and device verification. |
+| [PowerGuard](../ops/powerguard/README.md) and [PM2](../ops/pm2/README.md) | One systemd-managed PowerGuard instance; both PM2 startup lists no longer contain it. Log rotation runs every five minutes. |
+| NVMe and journal | Daily SMART collector enabled. Journal limited to 1 GiB and 14 days. |
+| [Music discovery](../ops/music-discovery/README.md) | Aurral connects to Lidarr through the existing host port; generated-download paths are aligned. VPN isolation preserved. |
+| Crafty | Minecraft startup restored from the previous configuration; Java's home-directory permission warning no longer appears. Discord bot login unconfirmed. |
+| [Beszel](../ops/beszel/README.md) | Collection restored; alerts and notification testing deferred. |
+
+Root capacity remains tight. External-drive backup and recovery are separate maintenance tasks. The live Compose files and host-only configuration are not replaced by this repository's reference definitions.
+
+## Mission Control observer evidence (2026-09-16)
+
+The following is a bounded read-only observation of the registered host. It is historical evidence for the selected observer resources, not a replacement for a full host inventory. The observer returned no repository contents, command output, logs, secrets, or unrestricted paths.
 
 | Subject | Evidence classification | Current evidence |
 |---------|------------------------|------------------|

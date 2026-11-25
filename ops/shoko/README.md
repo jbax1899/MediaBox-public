@@ -1,23 +1,19 @@
-# Shoko Docker Compose Configuration
+# Shoko
 
-This folder keeps the checked-in reference shape for the container.
+[compose.yml](compose.yml) is the reference container configuration.
 
-## Files
+- State is stored in `./data`, including the local `settings-server.json`.
+- Shoko listens on port `8111`. Jellyfin can reach it at `http://host.docker.internal:8111`.
+- The entrypoint runs through Bash because the image's script lacks execute permission.
 
-- [compose.yml](compose.yml)
+## Startup
 
-## Runtime Notes
+Shoko uses the `external-storage` Compose profile and has automatic restart disabled. Keep it stopped until the required media drive is verified and the [storage guard](../storage/README.md) is installed and configured.
 
-The live container:
+Start it through systemd:
 
 ```bash
-docker compose -f compose.yml up -d
+sudo systemctl start mediabox-shoko.service
 ```
 
-The active runtime:
-
-- Mounts the existing host state tree from a local `./data` directory
-- Publishes Shoko on host port `8111`
-- Reads the existing credentials from a local `settings-server.json` file
-- Should be reached from Jellyfin with `http://host.docker.internal:8111`
-- The compose file invokes `/bin/bash /docker-entrypoint.sh` because this image tag ships that script without execute permission.
+Direct Docker startup or explicitly enabling the Compose profile bypasses the mount check. Use the live Compose file in the guard configuration rather than assuming the reference file matches the host.

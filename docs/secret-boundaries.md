@@ -16,6 +16,9 @@ These files are safe to commit because they reference local-only state but do no
 - `ops/gluetun/config.toml.example` - placeholder local control config example
 - `ops/diskover/compose.yml` - Diskover CE runtime scaffold with local-only storage mounts
 - `ops/diskover/README.md` - Diskover CE runtime note and host setup steps
+- `ops/storage/` - storage guard scripts and units; expected UUIDs, devices, and the live Compose path stay in the host-only environment file
+- `ops/powerguard/` and `ops/pm2/` - host service and log rotation definitions without credentials
+- `ops/docker/daemon.json` - bounded Docker logging defaults
 
 ## Local-Only Files
 

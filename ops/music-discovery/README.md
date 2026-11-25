@@ -1,47 +1,19 @@
-# Music Discovery Runtime Scaffold
+# Music discovery
 
-This folder contains the starter container runtime for the missing-music discovery lane.
+[compose.yml](compose.yml) contains the reference stack: Lidarr for library management, Prowlarr for indexers and Aurral for discovery. Keep the owned library separate from staged imports and generated downloads. Each service has its own state directory.
 
-It keeps the first pass limited to:
+## Networking
 
-- `lidarr` for artist and album management
-- `prowlarr` for indexer management and Lidarr sync
-- `aurral` for discovery and flow generation
-- read-only access to local media roots
-- separate host paths for config, inbox, and generated discovery output
+On MediaBox, Lidarr, Prowlarr and qBittorrent share Gluetun's network namespace. Keep that isolation when changing the deployment; the reference Compose file alone does not reproduce the live VPN setup.
 
-## Files
+- From Aurral, use `http://host.docker.internal:8686` to reach Lidarr through Gluetun's existing host port. Do not publish an additional port. A standalone Compose setup on a common network can use `http://lidarr:8686` instead.
+- Use the existing qBittorrent endpoint from Lidarr. The standalone Compose setup uses `http://host.docker.internal:8098`. Keep the live namespace configuration unchanged unless it needs correction.
+- Aurral's default host port is `3002`; Lidarr and Prowlarr use `8686` and `9696`.
 
-- [compose.yml](compose.yml)
+For a standalone setup only, run `docker compose -f compose.yml up -d` from this directory. Prowlarr can reach Lidarr at `http://lidarr:8686`; its own endpoint is `http://prowlarr:9696` on that network. Do not use this startup command to replace MediaBox's Gluetun-backed deployment.
 
-## Paths
+## Downloads
 
-- the owned library stays separate from staged imports
-- the inbox is reserved for later staged imports
-- generated discovery output stays in its own folder
-- Lidarr, Aurral, and Prowlarr each keep their own state directory
-- Lidarr publishes on host port `8686`
-- Prowlarr publishes on host port `9696`
+Aurral and Lidarr must see the same generated-download directory at `/app/downloads`. Align their host bind mounts; use a Lidarr remote path mapping if different container paths are necessary.
 
-## Run
-
-From this directory:
-
-```bash
-docker compose -f compose.yml up -d
-```
-
-Prowlarr and Lidarr stay on the normal Docker network.
-
-By default Aurral publishes on host port `3002` if `3001` is already taken.
-When connecting Aurral to Lidarr, use `http://lidarr:8686` from inside Aurral.
-When connecting Prowlarr to Lidarr, use `http://lidarr:8686` and `http://prowlarr:9696`.
-When Lidarr connects to qBittorrent, use `http://host.docker.internal:8098` from inside the container.
-Use the current qBittorrent WebUI password, not any temporary first-boot credential.
-
-## Notes
-
-- This is scaffolding, not the full acquisition workflow.
-- Keep acquisition automation, ListenBrainz, and Ticketmaster out of the first pass.
-- Keep secrets and provider credentials in local host config, not in git.
-- Prowlarr manages indexers only; use the Gluetun-backed qBittorrent stack for peer-to-peer acquisition.
+Keep provider credentials in local configuration. Use the current qBittorrent WebUI password, not a first-boot credential. Acquisition automation, ListenBrainz and Ticketmaster are outside this scaffold's scope. Prowlarr manages indexers only; use the Gluetun-backed qBittorrent stack for peer-to-peer acquisition.

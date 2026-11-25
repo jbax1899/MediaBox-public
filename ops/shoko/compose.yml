@@ -1,7 +1,15 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   shoko:
+    logging: *bounded-logging
     image: ghcr.io/shokoanime/server:latest
     container_name: shokoserver
+    profiles: [external-storage]
     entrypoint: ["/bin/bash", "/docker-entrypoint.sh"]
     ports:
       - "8111:8111"
@@ -10,9 +18,17 @@ services:
       PGID: 1000
     volumes:
       - ./data:/home/shoko/.shoko
-      - ./media/anime:/mnt/anime
-      - ./media/incoming:/mnt/import
-    restart: unless-stopped
+      - type: bind
+        source: ./media/anime
+        target: /mnt/anime
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./media/incoming
+        target: /mnt/import
+        bind:
+          create_host_path: false
+    restart: "no"
     healthcheck:
       test: ["CMD-SHELL", "command -v wget >/dev/null 2>&1 && wget -qO- http://127.0.0.1:8111/ >/dev/null || command -v curl >/dev/null 2>&1 && curl -fsS http://127.0.0.1:8111/ >/dev/null"]
       interval: 30s

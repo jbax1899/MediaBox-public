@@ -1,5 +1,12 @@
+x-logging: &bounded-logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   filebrowser:
+    logging: *bounded-logging
     image: filebrowser/filebrowser:latest
     container_name: filebrowser
     command: ["-r", "/srv", "-p", "80", "--address", "0.0.0.0", "--database", "/database.db"]
